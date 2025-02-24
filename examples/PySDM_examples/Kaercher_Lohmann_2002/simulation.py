@@ -3,7 +3,7 @@ import numpy as np
 import PySDM.products as PySDM_products
 from PySDM.backends import CPU
 from PySDM.builder import Builder
-from PySDM.dynamics import AmbientThermodynamics, Condensation, Freezing
+from PySDM.dynamics import AmbientThermodynamics, Condensation, Freezing, VapourDepositionOnIce
 from PySDM.environments import Parcel
 from PySDM.physics import constants as const
 from PySDM.initialisation import discretise_multiplicities, equilibrate_wet_radii
@@ -48,6 +48,7 @@ class Simulation:
 
         builder.add_dynamic(AmbientThermodynamics())
         builder.add_dynamic(Condensation())
+        builder.add_dynamic(VapourDepositionOnIce())
         builder.add_dynamic(Freezing(singular=False,homogeneous_freezing=True,immersion_freezing=False))
 
 
@@ -74,6 +75,7 @@ class Simulation:
             PySDM_products.AmbientRelativeHumidity(name="RH", unit="%"),
             PySDM_products.AmbientRelativeHumidity(name="RH_ice", unit="%"),
             PySDM_products.AmbientTemperature(name="T"),
+            PySDM_products.AmbientPressure(name="p", unit='hPa'),
             PySDM_products.WaterMixingRatio(name="water", radius_range=(0, np.inf)),
             PySDM_products.WaterMixingRatio(name="ice", radius_range=(-np.inf, 0)),
             PySDM_products.WaterMixingRatio(name="total", radius_range=(-np.inf, np.inf)),
@@ -114,6 +116,7 @@ class Simulation:
         output["RH"].append(self.particulator.products["RH"].get()[cell_id])
         output["RHi"].append(self.particulator.products["RH_ice"].get()[cell_id])
         output["T"].append(self.particulator.products["T"].get()[cell_id])
+        output["P"].append(self.particulator.products["p"].get()[cell_id])
         output["LWC"].append(self.particulator.products["water"].get()[cell_id])
         output["IWC"].append(self.particulator.products["ice"].get()[cell_id])
      #   output["TWC"].append(self.particulator.products["total"].get()[cell_id])
@@ -130,6 +133,7 @@ class Simulation:
             "RH": [],
             "RHi": [],
             "T": [],
+            "P": [],
             "LWC": [],
             "IWC": [],
     #        "TWC": [],
@@ -146,8 +150,8 @@ class Simulation:
             # print(self.particulator.attributes.__dict__)
             # print(self.particulator.attributes._ParticleAttributes__attributes['signed water mass'])
             self.particulator.run(self.n_substeps)
-            #print( self.particulator.products["t"].get() )
-
+            print( self.particulator.products["t"].get() )
+            print( self.particulator.products["p"].get() )
             self.save(output)
 
         return output

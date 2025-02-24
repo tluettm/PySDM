@@ -162,16 +162,16 @@ def plot( output, setting, pp ):
     fig.tight_layout() 
     pp.savefig()
 
-general_settings = {"n_sd": 100, "T0": 220 * si.kelvin, "w_updraft": 10 * si.centimetre / si.second}
+general_settings = {"n_sd": 10000, "T0": 220 * si.kelvin, "w_updraft": 10 * si.centimetre / si.second}
 distributions = ({"N_dv_solution_droplet": 2500 / si.centimetre**3, \
                   "r_mean_solution_droplet": 0.055 * si.micrometre, \
                   "sigma_solution_droplet": 1.6},
-                 {"N_dv_solution_droplet": 8600 / si.centimetre**3, \
-                  "r_mean_solution_droplet": 0.0275 * si.micrometre, \
-                  "sigma_solution_droplet": 1.3},
-                 {"N_dv_solution_droplet": 2000 / si.centimetre**3, \
-                  "r_mean_solution_droplet": 0.11 * si.micrometre, \
-                  "sigma_solution_droplet": 2.},
+                 # {"N_dv_solution_droplet": 8600 / si.centimetre**3, \
+                 #  "r_mean_solution_droplet": 0.0275 * si.micrometre, \
+                 #  "sigma_solution_droplet": 1.3},
+                 # {"N_dv_solution_droplet": 2000 / si.centimetre**3, \
+                 #  "r_mean_solution_droplet": 0.11 * si.micrometre, \
+                 #  "sigma_solution_droplet": 2.},
                  )
 
 pp = PdfPages( "hom_freezing_for_size_distributions.pdf" )
