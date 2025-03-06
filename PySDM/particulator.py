@@ -489,6 +489,9 @@ class Particulator:  # pylint: disable=too-many-public-methods,too-many-instance
             ambient_humidity=self.environment["RH"],
             ambient_water_activity=self.environment["a_w_ice"],
             ambient_vapour_mixing_ratio=self.environment["water_vapour_mixing_ratio"],
+            predicted_water_vapour_mixing_ratio=self.environment.get_predicted(
+                "water_vapour_mixing_ratio"
+            ),
             ambient_dry_air_density=self.environment["rhod"],
             cell_volume=self.environment.mesh.dv,
             time_step=self.dt,

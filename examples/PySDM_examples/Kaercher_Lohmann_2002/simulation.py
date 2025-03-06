@@ -152,6 +152,7 @@ class Simulation:
             self.particulator.run(self.n_substeps)
             print( self.particulator.products["t"].get() )
             print( self.particulator.products["p"].get() )
+            print( self.particulator.attributes["signed water mass"].data )
             self.save(output)
 
         return output

@@ -23,6 +23,7 @@ class DepositionMethods(BackendMethods):  # pylint:disable=too-few-public-method
             ambient_humidity,
             ambient_water_activity,
             ambient_vapour_mixing_ratio,
+            predicted_water_vapour_mixing_ratio,
             ambient_dry_air_density,
             cell_volume,
             time_step,
@@ -104,13 +105,18 @@ class DepositionMethods(BackendMethods):  # pylint:disable=too-few-public-method
 
                     # print(f"{ambient_dry_air_density=},{cell_volume=},{diffusion_coefficient=},{Dv_const=},{temperature=},{pressure=},{lambdaD=},{radius=},{thermal_conductivity=}")
                     # print( f"{signed_water_mass[i]=},{ice_mass=},{dm_dt=},{capacity=},{howell_factor=},{diffusion_coefficient=},{saturation_ratio_ice=}" )
+
                     delta_rv_i = (
                         -dm_dt * multiplicity[i] * time_step / (cell_volume * rho)
                     )
+                    ambient_vapour_mixing_ratio_save = ambient_vapour_mixing_ratio[cid]
                     if -delta_rv_i > ambient_vapour_mixing_ratio[cid]:
                         assert False
-                    ambient_vapour_mixing_ratio[cid] += delta_rv_i
+                    # ambient_vapour_mixing_ratio[cid] += delta_rv_i
+                    predicted_water_vapour_mixing_ratio[cid] += delta_rv_i
 
+                    # print(
+                    #   f"{-dm_dt=},{multiplicity[i]=},{time_step=},{cell_volume=},{rho=},{delta_rv_i=},{ambient_vapour_mixing_ratio_save=},{ambient_vapour_mixing_ratio[cid]=}")
                     delta_T = -delta_rv_i * latent_heat_sub / formulae.constants.c_pd
                     ambient_temperature[cid] += delta_T
 
@@ -131,6 +137,7 @@ class DepositionMethods(BackendMethods):  # pylint:disable=too-few-public-method
         ambient_humidity,
         ambient_water_activity,
         ambient_vapour_mixing_ratio,
+        predicted_water_vapour_mixing_ratio,
         ambient_dry_air_density,
         cell_volume,
         time_step,
@@ -146,6 +153,7 @@ class DepositionMethods(BackendMethods):  # pylint:disable=too-few-public-method
             ambient_humidity=ambient_humidity.data,
             ambient_water_activity=ambient_water_activity.data,
             ambient_vapour_mixing_ratio=ambient_vapour_mixing_ratio.data,
+            predicted_water_vapour_mixing_ratio=predicted_water_vapour_mixing_ratio.data,
             ambient_dry_air_density=ambient_dry_air_density.data,
             cell_volume=cell_volume,
             time_step=time_step,
