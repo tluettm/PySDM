@@ -146,16 +146,18 @@ def ensemble_simulation(number_of_ensemble_runs=1,
 #     ensemble_simulation( lower_limit=lower_limit, number_of_ensemble_runs=25, w_updraft=1.)
 
 initial_temperatures = [196.,216.,236.]
-updrafts = [0.05, 0.1, 0.5, 1., 5., 10.]
-number_of_ensemble_runs=1
-dsd=0
+updrafts = [0.05, 0.1, 0.3, 0.5, 1., 3., 5., 10.]
+# updrafts = [0.3, 3.,]
+number_of_ensemble_runs=5
+dsd_list= [0,1,2]
 
-for T in reversed(initial_temperatures):
-    for w in reversed(updrafts):
-        ensemble_simulation(number_of_ensemble_runs=number_of_ensemble_runs,
-                            w_updraft=w,
-                            T0=T,
-                            dsd=dsd,
-                            linear_sampling=False,
-                            nsd_single = 10,
-                            )
+for dsd in dsd_list:
+    for T in reversed(initial_temperatures):
+        for w in reversed(updrafts):
+            ensemble_simulation(number_of_ensemble_runs=number_of_ensemble_runs,
+                                w_updraft=w,
+                                T0=T,
+                                dsd=dsd,
+                                linear_sampling=False,
+                                nsd_single = 50000,
+                                )

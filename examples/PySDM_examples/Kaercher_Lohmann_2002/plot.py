@@ -3,7 +3,7 @@ from matplotlib import pyplot
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.pyplot import boxplot
 
-from reference import bulk_model_reference, critical_supersaturation_spich2023
+from reference import bulk_model_reference, critical_supersaturation_spich2023, bulk_model_reference_array
 
 import json
 import numpy as np
@@ -43,7 +43,7 @@ def plot_size_distribution(r_wet, r_dry, N, setting, pp):
 def plot_evolution( pp, output ):
     ln = 2.5
 
-    extra_panel = True
+    extra_panel = False
 
     time = output["t"]
     temperature = np.asarray(output["T"])
@@ -75,7 +75,7 @@ def plot_evolution( pp, output ):
         fig, axs = pyplot.subplots(2, 2, figsize=(10, 10), sharex=False)
 
 
-    x_limit = [0, np.amax(time)]
+    x_limit = [350, np.amax(time)]
 
     # title = (f"w: {setting.w_updraft:.2f} m s-1 T0: {setting.initial_temperature:.2f} K "
     #          f"Nsd: {setting.n_sd:d} rate: ") + setting.rate
@@ -101,17 +101,17 @@ def plot_evolution( pp, output ):
     axTz.tick_params(labelsize=tick_fsize)
     twin.tick_params(labelsize=tick_fsize)
     axTz.set_title("(a) air parcel ascent", fontsize=title_fsize)
-    axTz.set_xlim(x_limit)
+    axTz.set_xlim(0,x_limit[1])
 
     axRH = axs[0, 1]
     # axRH.plot(
     #     time, rh, color="blue", linestyle="-", label="water", linewidth=ln
     # )
     axRH.plot(
-        time, rhi, color="red", linestyle="-", label="ice", linewidth=ln
+        time, rhi, color="red", linestyle="-", label=r"$S_{i}$", linewidth=ln
     )
     axRH.plot(
-        time, rhi_crit, color="black", linestyle="-", label="crit", linewidth=ln
+        time, rhi_crit, color="black", linestyle="-", label=r"$S_{cr}$", linewidth=ln
     )
     # axRH.plot(
     #     time, rhi_crit_old, color="black", linestyle="--", label="crit_old", linewidth=ln
@@ -165,7 +165,7 @@ def plot_evolution( pp, output ):
         axWC = axs[2, 0]
 
         axWC.plot(
-            time, lwc, color="blue", linestyle="-", label="water", linewidth=ln
+            time, lwc, color="blue", linestyle="-", label="solution droplet", linewidth=ln
         )
         axWC.plot(
             time, iwc, color="red", linestyle="-", label="ice", linewidth=ln
@@ -205,7 +205,7 @@ def plot_ensemble(pp, outputs, T0, ens_member, only_ni = False, title = None):
 
     x_label = "number of super particles"
 
-    ni_bulk_ref = bulk_model_reference(T0) * 1e-6
+
 
     nx = len(outputs)
 
@@ -218,6 +218,8 @@ def plot_ensemble(pp, outputs, T0, ens_member, only_ni = False, title = None):
     ri_arr = np.empty((ens_member, np.shape(x_array)[0]))
     frozen_fraction_arr = np.empty((ens_member, np.shape(x_array)[0]))
     min_frozen_r_arr = np.empty((ens_member, np.shape(x_array)[0]))
+
+    ni_bulk_ref = bulk_model_reference(T0, updraft=1) * 1e-6
 
     jdx = 0
     idx_ref = 0
@@ -249,55 +251,60 @@ def plot_ensemble(pp, outputs, T0, ens_member, only_ni = False, title = None):
     if only_ni:
         if title is not None:
             ax.set_title(title, fontsize=title_fsize)
-        ax.boxplot(ni_arr, tick_labels=x_string_array)
+        ax.boxplot(ni_arr, tick_labels=x_array)
         ax.set_yscale('log')
-        ax.set_ylim(1.e-2, 1.e2)
-        ax.axhline(ni_bulk_ref, c="r")
+        ax.set_ylim(1.e-1,1.e2)
+        # ax.axhline(ni_bulk_ref, c="r")
         ax.set_ylabel(r"ice number concentration [$\mathrm{cm^{-3}}$]"
                        , fontsize=ax_lab_fsize)
         ax.set_xlabel(x_label, fontsize=ax_lab_fsize)
         ax.tick_params(axis='y', labelsize=tick_fsize)
+        # ax.grid(True)
     else:
         axN = axs[0, 0]
         axN.set_title("(a) nucleated number concentration", fontsize=title_fsize)
-        axN.boxplot(ni_arr,tick_labels=x_string_array)
+        axN.boxplot(ni_arr,tick_labels=x_array)
         axN.set_yscale('log')
-        axN.set_ylim(1.e-2, 1.e2)
-        axN.axhline(ni_bulk_ref, c="r")
+        axN.set_ylim(1.e-1, 1.e2)
+        # axN.axhline(ni_bulk_ref, c="r")
         axN.set_ylabel(r"ice number concentration [$\mathrm{cm^{-3}}$]"
                        , fontsize=ax_lab_fsize)
         axN.set_xlabel(x_label, fontsize=ax_lab_fsize)
         axN.tick_params(axis='y', labelsize=tick_fsize)
+        # axN.grid(True,alpha=0.5)
 
         axR = axs[0, 1]
         axR.set_title("(b) mean radius", fontsize=title_fsize)
-        axR.boxplot(ri_arr,tick_labels=x_string_array)
+        axR.boxplot(ri_arr,tick_labels=x_array)
         axR.set_xlabel(x_label)
-        axR.set_yscale('log')
-        axR.set_ylim(5.e-2, 1.e2)
+        # axR.set_yscale('log')
+        axR.set_ylim(1, 25)
         axR.set_ylabel(r"ice mean radius[µm]"
                        , fontsize=ax_lab_fsize)
         axR.tick_params(axis='y', labelsize=tick_fsize)
+        # axR.grid(True)
 
         axF = axs[1, 0]
         axF.set_title("(c) frozen fraction", fontsize=title_fsize)
-        axF.boxplot(frozen_fraction_arr,tick_labels=x_string_array)
+        axF.boxplot(frozen_fraction_arr,tick_labels=x_array)
         axF.set_xlabel(x_label, fontsize=ax_lab_fsize)
         axF.set_yscale('log')
-        axF.set_ylim(1.e-5, 1)
+        axF.set_ylim(1.e-4, 1)
         axF.set_ylabel(r"fraction of frozen super particles"
                        , fontsize=ax_lab_fsize)
         axF.tick_params(axis='y', labelsize=tick_fsize)
+        # axF.grid(True)
 
         axM = axs[1, 1]
         axM.set_title("(d) radius of smallest frozen droplet", fontsize=title_fsize)
-        axM.boxplot(min_frozen_r_arr,tick_labels=x_string_array)
+        axM.boxplot(min_frozen_r_arr,tick_labels=x_array)
         axM.set_xlabel(x_label, fontsize=ax_lab_fsize)
         axM.set_yscale('log')
-        axM.set_ylim(5.e-3, 5.e0)
+        axM.set_ylim(1.e-2, 1.e0)
         axM.set_ylabel(r"minimum radius of frozen droplets [µm]"
                        , fontsize=ax_lab_fsize)
         axM.tick_params(axis='y', labelsize=tick_fsize)
+        # axM.grid(True)
 
     fig.tight_layout()
     pp.savefig()
@@ -320,11 +327,12 @@ def plot_ensemble_simulation(file_name, only_ni=False, title=None):
     pp.close()
 
 # filename= "ensemble_nsd_25_dsd_0_T0_220.json"
+# # filename= "ensemble_25_dsd_0_T0_216_W_1.00.json"
 # plot_ensemble_simulation(filename)
-filename= "ensemble_nsd_25_dsd_0_T0_220_lin.json"
-plot_ensemble_simulation(filename, only_ni=True, title="linear sampling")
-filename= "ensemble_nsd_25_dsd_0_T0_220_limit.json"
-plot_ensemble_simulation(filename, only_ni=True, title="limited sampling")
+# filename= "ensemble_nsd_25_dsd_0_T0_220_lin.json"
+# plot_ensemble_simulation(filename, only_ni=True, title="linear sampling")
+# filename= "ensemble_nsd_25_dsd_0_T0_220_limit.json"
+# plot_ensemble_simulation(filename, only_ni=True, title="limited sampling")
 
 
 
@@ -454,43 +462,42 @@ def plot_size_distribution_discretisation():
     fig.tight_layout()
     plt.savefig("size_distributions.pdf")
 
-
+plot_size_distribution_discretisation()
 
 def plot_ni_as_function_of_w():
 
-    dsd_list = np.array([0])
+    dsd_list = np.array([0,1,2])
     initial_temperatures = np.array([196., 216., 236.])
-    updrafts = np.array([0.05, 0.1, 0.5, 1., 5., 10.])
+    updrafts = np.array([0.05, 0.1, 0.3, 0.5, 1., 3., 5., 10.])
 
     dim_size = ( np.shape(dsd_list)[0], np.shape(initial_temperatures)[0], np.shape(updrafts)[0] )
     ni_sdm = np.zeros(dim_size)
 
-
+    ni_ref = bulk_model_reference_array()
+    ni_ref = ni_ref * 1e-6
 
     for i in range(dim_size[0]):
         for j in range(dim_size[1]):
             T0 = initial_temperatures[j]
             for k in range(dim_size[2]):
                 w = updrafts[k]
-                filename = "ensemble_1_dsd_"+str(i)+f"_T0_{T0:.0f}"+f"_W_{w:.2f}"+"_nsd_10.json"
+                filename = "ensemble_5_dsd_"+str(i)+f"_T0_{T0:.0f}"+f"_W_{w:.2f}"+"_nsd_50000.json"
                 # print(filename)
 
                 with open(filename, 'r') as f:
                     data = json.load(f)
-
                 T0_sim = data['initial_temperature']
                 w_sim   = data['w_updraft']
                 if T0 == T0_sim and w == w_sim:
-                    output = data['outputs'][0]
-                    ni_last = output["ni"][-1]
-                    print( w, T0, ni_last )
-                    ni_sdm[i,j,k] = ni_last
+                    ni_last = []
+                    for output in data['outputs']:
+                        ni_last.append(output["ni"][-1])
+                    print(  w, T0, np.mean(ni_last) )
+                    ni_sdm[i,j,k] = np.mean(ni_last)
 
-    print(ni_sdm)
+    fig, axs = pyplot.subplots(1, 3, figsize=(15, 5), sharey=True)
 
-    fig, axs = pyplot.subplots(1, 3, figsize=(15, 5), sharex=False)
-
-    for i in range(1):
+    for i in range(dim_size[0]):
         ax = axs[i]
 
         if i == 0:
@@ -502,16 +509,19 @@ def plot_ni_as_function_of_w():
 
         for j in range(dim_size[1]):
          ax.scatter(updrafts, ni_sdm[i,j,:],label=f"T0={initial_temperatures[j]:.0f}K")
+         ax.plot(updrafts, ni_ref[i,j,:], linestyle="dashed")
 
         ax.tick_params(labelsize=tick_fsize)
         ax.set_xscale('log')
         ax.set_xlabel(r"vertical updraft [$\mathrm{m \, s^{-1}}$]"
                        , fontsize=ax_lab_fsize)
         ax.set_yscale('log')
-        ax.set_ylim(1.e-1, 8.e3)
+        ax.set_ylim(1.e-2, 1.e4)
         ax.set_ylabel(r"ice number concentration [$\mathrm{cm^{-3}}$]"
                        , fontsize=ax_lab_fsize)
-        ax.legend(fontsize=ax_lab_fsize,loc="lower right")
+        ax.grid(True,alpha=0.5)
+        if i == 2:
+            ax.legend(fontsize=ax_lab_fsize,loc="upper left")
 
     plt.tight_layout
     plt.savefig("w_ni_plot.pdf")
